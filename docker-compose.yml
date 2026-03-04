@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  wecom-callback:
+    build: .
+    container_name: wecom-callback
+    ports:
+      - "8099:8099"
+    env_file:
+      - .env
+    restart: always
