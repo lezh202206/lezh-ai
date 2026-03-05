@@ -7,16 +7,16 @@ from app.wecom.crypto import WXBizMsgCrypt
 
 def test_crypto():
     # 模拟配置
-    token = "test_token"
-    aes_key = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG" # 43位
-    corp_id = "test_corp_id"
+    token = "kLD8rPBAYopCwN1JsLJt6sUM5NM"
+    aes_key = "kzxjkrnCxo667ATqybuRMLDqeDHDmtzLimJLyBWSxv5" # 43位
+    corp_id = "wwe7cef0155c44fa95"
     
     wxcpt = WXBizMsgCrypt(token, aes_key, corp_id)
     
     # 1. 测试签名生成
     msg = "test_message"
     timestamp = "12345678"
-    nonce = "test_nonce"
+    nonce = "1"
     sig = wxcpt.get_signature(token, timestamp, nonce, msg)
     assert sig is not None
     print(f"Signature: {sig}")

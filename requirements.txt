@@ -2,3 +2,11 @@ fastapi
 uvicorn
 cryptography
 python-dotenv
+# LangChain & LangGraph
+langchain
+langchain-openai
+langgraph
+pydantic-settings
+httpx
+respx
+pytest-asyncio
