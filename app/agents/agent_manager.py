@@ -20,14 +20,23 @@ class AgentManager:
             user_content = message.get("content")
             
             # 2. 调用 LangGraph Agent 处理
-            from app.agents.langgraph_agent import run_agent
-            ai_response = run_agent(user_content)
-            
-            # 3. 通过 send_text_message 主动回复用户
-            await wecom_service.send_text_message(
-                touser=from_user,
-                content=ai_response
-            )
+            try:
+                from app.agents.langgraph_agent import run_agent
+                ai_response = await run_agent(user_content)
+                
+                # 3. 通过 send_text_message 主动回复用户
+                await wecom_service.send_text_message(
+                    touser=from_user,
+                    content=ai_response
+                )
+            except Exception as e:
+                import logging
+                logging.error(f"Agent processing failed: {e}")
+                # 发生错误时，尝试回复一个错误消息
+                await wecom_service.send_text_message(
+                    touser=from_user,
+                    content=f"抱歉，处理消息时遇到一点问题 ({str(e)})"
+                )
         
         return "success"
 
