@@ -75,7 +75,7 @@ langgraph_agent = workflow.compile()
 
 
 # 暴露一个简化的调用接口
-def run_agent(question: str):
+async def run_agent(question: str):
     inputs = {"messages": [HumanMessage(content=question)]}
-    response = langgraph_agent.invoke(inputs)
+    response = await langgraph_agent.ainvoke(inputs)
     return response["messages"][-1].content

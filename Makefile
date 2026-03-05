@@ -18,9 +18,9 @@ install:
 	pip install -r requirements.txt
 
 # 运行应用
-run: 
-	@echo "--> Starting application on http://127.0.0.1:8099"
-	uvicorn app.main:app --host 127.0.0.1 --port 8099 --reload
+loc_run:
+	@echo "--> Starting application on http://0.0.0.0:8099"
+	uvicorn app.main:app --host 0.0.0.0 --port 8099 --reload
 
 # 运行测试
 test:
@@ -33,11 +33,11 @@ dev:
 	langgraph dev --allow-blocking
 
 ## 启动 LangSmith 本地实例
-#langsmith-start:
-#	@echo "--> Starting LangSmith local instance..."
-#	docker-compose up -d
+langsmith-start:
+	@echo "--> Starting LangSmith local instance..."
+	docker compose up -d
 #
 ## 停止 LangSmith 本地实例
-#langsmith-stop:
-#	@echo "--> Stopping LangSmith local instance..."
-#	docker-compose down
+langsmith-stop:
+	@echo "--> Stopping LangSmith local instance..."
+	docker compose down
