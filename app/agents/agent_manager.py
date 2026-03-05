@@ -20,34 +20,20 @@ class AgentManager:
             user_content = message.get("content")
             print(f"[AgentManager] 收到文本内容: {user_content}，来自用户: {from_user}")
             
-            # 2. 调用 LangGraph Agent 处理
+            # 直接回复 "你好" (暂时移除 AI 逻辑)
             try:
-                from app.agents.langgraph_agent import run_agent
-                print("[AgentManager] 正在调用 LangGraph Agent...")
-                ai_response = await run_agent(user_content)
-                print(f"[AgentManager] AI 回复结果: {ai_response}")
-                
-                # 3. 通过 send_text_message 主动回复用户
-                print(f"[AgentManager] 准备发送消息给企业微信: {from_user}")
+                print(f"[AgentManager] 正在发送回复: 你好")
                 await wecom_service.send_text_message(
                     touser=from_user,
-                    content=ai_response
+                    content="你好"
                 )
                 print("[AgentManager] 消息发送指令执行完毕")
             except Exception as e:
                 import logging
                 import traceback
                 error_detail = traceback.format_exc()
-                print(f"[AgentManager] 发生错误: {e}\n{error_detail}")
-                logging.error(f"Agent processing failed: {e}", exc_info=True)
-                # 发生错误时，尝试回复一个错误消息
-                try:
-                    await wecom_service.send_text_message(
-                        touser=from_user,
-                        content=f"抱歉，处理消息时遇到一点问题 ({str(e)})"
-                    )
-                except:
-                    pass
+                print(f"[AgentManager] 发送失败: {e}\n{error_detail}")
+                logging.error(f"Send simple reply failed: {e}", exc_info=True)
         else:
             print(f"[AgentManager] 收到非文本消息，类型: {msg_type}，暂不处理")
         
