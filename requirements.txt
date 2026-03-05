@@ -4,8 +4,12 @@ cryptography
 python-dotenv
 # LangChain & LangGraph
 langchain
-langchain-openai
 langgraph
+langgraph-cli
+langchain-openai
+langchain-community
+dashscope
+langsmith
 pydantic-settings
 httpx
 respx

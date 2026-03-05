@@ -19,9 +19,9 @@ class AgentManager:
         if msg_type == "text":
             user_content = message.get("content")
             
-            # 2. 模拟大模型处理逻辑
-            # response = await self.llm_chain.ainvoke({"input": user_content})
-            ai_response = f"AI助手收到您的消息: '{user_content}'。目前正在集成 LangChain/LangGraph..."
+            # 2. 调用 LangGraph Agent 处理
+            from app.agents.langgraph_agent import run_agent
+            ai_response = run_agent(user_content)
             
             # 3. 通过 send_text_message 主动回复用户
             await wecom_service.send_text_message(

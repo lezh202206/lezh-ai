@@ -1,0 +1,9 @@
+[project]
+name = "wecom-ai-agent"
+version = "0.1.0"
+description = "An AI agent integrated with WeChat Work (WeCom) using LangChain and LangGraph."
+authors = [{ name = "lezh", email = "1157640697@qq.com" }]
+
+[tool.langsmith]
+# LangSmith project name, optional. Defaults to the name of the project.
+# project_name = "my-langsmith-project"
