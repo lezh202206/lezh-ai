@@ -48,11 +48,32 @@ class MCPService:
     def _get_weather(self, location: str) -> str:
         """
         获取天气信息的实际实现
+        返回详细的天气数据，让模型可以生成更丰富的回复
         """
-        weather_conditions = ["晴天", "多云", "小雨", "中雨", "大雨", "晴转多云"]
+        weather_conditions = ["晴天", "多云", "小雨", "中雨", "大雨", "晴转多云", "阴", "雷阵雨", "阵雨", "雾"]
         weather = random.choice(weather_conditions)
-        temp = random.randint(15, 30)
-        return f"{location}今天天气{weather}，气温 {temp} 度。"
+        temp_min = random.randint(10, 20)
+        temp_max = random.randint(20, 35)
+        humidity = random.randint(40, 80)
+        wind_speed = random.randint(1, 10)
+        wind_direction = random.choice(["东风", "南风", "西风", "北风", "东北风", "东南风", "西南风", "西北风"])
+        
+        return json.dumps({
+            "location": location,
+            "weather": weather,
+            "temperature": {
+                "min": temp_min,
+                "max": temp_max,
+                "current": random.randint(temp_min, temp_max)
+            },
+            "humidity": f"{humidity}%",
+            "wind": {
+                "speed": f"{wind_speed}级",
+                "direction": wind_direction
+            },
+            "air_quality": random.choice(["优", "良", "轻度污染"]),
+            "suggestion": "建议适当增减衣物" if weather in ["小雨", "中雨", "大雨", "雷阵雨", "阵雨"] else "适合户外活动"
+        }, ensure_ascii=False)
     
     def _call_model(self, messages: List[Dict[str, Any]]) -> GenerationResponse:
         """
