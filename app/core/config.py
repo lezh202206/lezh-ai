@@ -25,4 +25,8 @@ class Settings:
     PORT: int = int(os.getenv("PORT", "8099"))
     HOST: str = os.getenv("HOST", "0.0.0.0")
 
+    # 阿里云百炼 MCP 配置（高德地图天气查询）
+    BAILIAN_MCP_API_KEY: str = os.getenv("BAILIAN_MCP_API_KEY", "")
+    BAILIAN_MCP_BASE_URL: str = os.getenv("BAILIAN_MCP_BASE_URL", "https://mcp.api.aliyun.com/v1")
+
 settings = Settings()
