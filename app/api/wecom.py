@@ -3,6 +3,7 @@ from fastapi.responses import PlainTextResponse
 from app.services.wecom_service import wecom_service
 from app.agents.agent_manager import agent_manager
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,15 @@ async def verify_url(
         logger.error(f"Verify URL failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
+async def process_message_background(message_info: dict):
+    """
+    后台异步处理消息
+    """
+    try:
+        await agent_manager.process_message(message_info)
+    except Exception as e:
+        logger.error(f"Background message processing failed: {e}")
+
 @router.post("")
 async def receive_msg(
     msg_signature: str,
@@ -43,11 +53,12 @@ async def receive_msg(
         message_info = wecom_service.handle_received_message(msg_signature, timestamp, nonce, body)
         logger.info(f"Structured message: {message_info}")
         
-        # 使用 Agent 处理逻辑
-        # 后续大模型将接收 message_info，并通过 send_text_message 回复
-        await agent_manager.process_message(message_info)
+        # 异步处理消息：立即返回 success，然后后台处理 AI 请求
+        # 这样可以避免企业微信的重试机制（5秒超时）
+        asyncio.create_task(process_message_background(message_info))
         
         # 企业微信要求收到消息后必须回复 success 或者空字符串
+        # 立即返回，让企业微信不会触发重试
         return Response(content="success", media_type="text/plain")
     except Exception as e:
         logger.error(f"Handle message failed: {e}")
