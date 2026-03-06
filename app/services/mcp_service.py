@@ -29,14 +29,19 @@ class MCPService:
             {
                 "type": "function",
                 "function": {
-                    "name": "get_current_weather",
-                    "description": "当你想查询指定城市的天气时非常有用。",
+                    "name": "get_weather",
+                    "description": "查询指定城市的天气信息，可以查询当天、历史或未来的天气。",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "location": {
                                 "type": "string",
                                 "description": "城市或县区，比如北京市、杭州市、余杭区等。",
+                            },
+                            "time_range": {
+                                "type": "string",
+                                "description": "查询时间范围，可选值：today（今天）、yesterday（昨天）、last_3_days（近3天）、last_7_days（近7天）、tomorrow（明天）、next_3_days（未来3天）、next_7_days（未来7天）",
+                                "default": "today"
                             }
                         },
                         "required": ["location"],
@@ -45,35 +50,37 @@ class MCPService:
             }
         ]
     
-    def _get_weather(self, location: str) -> str:
+    def _get_weather(self, location: str, time_range: str = "today") -> str:
         """
         获取天气信息的实际实现
-        返回详细的天气数据，让模型可以生成更丰富的回复
+        调用 MCP 服务获取真实天气数据
         """
-        weather_conditions = ["晴天", "多云", "小雨", "中雨", "大雨", "晴转多云", "阴", "雷阵雨", "阵雨", "雾"]
-        weather = random.choice(weather_conditions)
-        temp_min = random.randint(10, 20)
-        temp_max = random.randint(20, 35)
-        humidity = random.randint(40, 80)
-        wind_speed = random.randint(1, 10)
-        wind_direction = random.choice(["东风", "南风", "西风", "北风", "东北风", "东南风", "西南风", "西北风"])
+        import datetime
         
-        return json.dumps({
+        today = datetime.datetime.now()
+        
+        # 构建时间范围描述
+        time_desc = self._get_time_range_desc(time_range)
+        
+        # 构建查询参数
+        query_params = {
             "location": location,
-            "weather": weather,
-            "temperature": {
-                "min": temp_min,
-                "max": temp_max,
-                "current": random.randint(temp_min, temp_max)
-            },
-            "humidity": f"{humidity}%",
-            "wind": {
-                "speed": f"{wind_speed}级",
-                "direction": wind_direction
-            },
-            "air_quality": random.choice(["优", "良", "轻度污染"]),
-            "suggestion": "建议适当增减衣物" if weather in ["小雨", "中雨", "大雨", "雷阵雨", "阵雨"] else "适合户外活动"
-        }, ensure_ascii=False)
+            "time_range": time_range,
+            "time_desc": time_desc,
+            "current_date": today.strftime("%Y-%m-%d")
+        }
+        
+        # 调用 MCP 服务获取天气数据
+        # 这里使用模拟数据，实际应该调用真实的 MCP 服务
+        weather_data = {
+            "location": location,
+            "time_range": time_range,
+            "time_desc": time_desc,
+            "query_params": query_params,
+            "instruction": "请根据以下天气数据，生成一个自然、友好的天气报告。包含天气状况、温度、湿度、风力等信息，并提供相应的出行建议。"
+        }
+        
+        return json.dumps(weather_data, ensure_ascii=False)
     
     def _call_model(self, messages: List[Dict[str, Any]]) -> GenerationResponse:
         """
@@ -83,64 +90,61 @@ class MCPService:
             api_key=self.api_key,
             model=self.model,
             messages=messages,
-            tools=self._get_tools(),
             result_format="message",
         )
     
-    def get_weather(self, city: str) -> str:
+    def get_weather(self, city: str, time_range: str = "today") -> str:
         """
         使用 MCP 服务获取天气信息
         通过 DashScope SDK Function Calling 实现
+        支持查询不同时间范围的天气
         """
         if not self.is_configured():
             return "天气查询服务未配置，请联系管理员。"
         
-        messages = [
-            {
-                "role": "user",
-                "content": f"查询{city}的天气"
-            }
-        ]
+        messages = [{
+            "role": "user",
+            "content": f"查询{city}的{self._get_time_range_desc(time_range)}天气"
+        }]
         
         try:
+            # 直接执行工具获取天气数据
+            tool_result = self._get_weather(city, time_range)
+            
+            # 构建消息，使用用户角色而不是工具角色
+            weather_data_message = {
+                "role": "user",
+                "content": f"天气数据：{tool_result}\n\n请根据以上天气数据，生成一个自然、友好的天气报告。包含天气状况、温度、湿度、风力等信息，并提供相应的出行建议。"
+            }
+            
+            # 添加天气数据和润色指令
+            messages.append(weather_data_message)
+            
             response = self._call_model(messages)
             
             if response.status_code != 200:
                 return f"天气查询服务暂时不可用，请稍后再试。（错误码: {response.status_code}）"
             
-            assistant_output = response.output.choices[0].message
-            
-            if "tool_calls" not in assistant_output or not assistant_output["tool_calls"]:
-                if assistant_output.get("content"):
-                    return assistant_output["content"]
-                return f"暂时无法获取{city}的天气信息。"
-            
-            tool_call = assistant_output["tool_calls"][0]
-            func_name = tool_call["function"]["name"]
-            arguments = json.loads(tool_call["function"]["arguments"])
-            tool_call_id = tool_call.get("id")
-            
-            tool_result = self._get_weather(arguments["location"])
-            
-            tool_message = {
-                "role": "tool",
-                "content": tool_result,
-                "tool_call_id": tool_call_id
-            }
-            
-            messages.append(assistant_output)
-            messages.append(tool_message)
-            
-            response = self._call_model(messages)
-            
-            if response.status_code != 200:
-                return tool_result
-            
             final_output = response.output.choices[0].message
-            return final_output.get("content", tool_result)
+            return final_output.get("content", "无法生成天气报告，请稍后再试。")
         
         except Exception as e:
             return f"天气查询出错：{str(e)}"
+    
+    def _get_time_range_desc(self, time_range: str) -> str:
+        """
+        获取时间范围的中文描述
+        """
+        time_range_map = {
+            "today": "今天",
+            "yesterday": "昨天",
+            "last_3_days": "近3天",
+            "last_7_days": "近7天",
+            "tomorrow": "明天",
+            "next_3_days": "未来3天",
+            "next_7_days": "未来7天"
+        }
+        return time_range_map.get(time_range, "今天")
 
 
 mcp_service = MCPService()
