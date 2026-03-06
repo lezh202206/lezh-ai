@@ -11,23 +11,16 @@ class AgentManager:
         :param message: 包含消息详情的结构化字典 (由 WeComService.handle_received_message 生成)
         :return: 回复状态
         """
-        print(f"[AgentManager] 开始处理消息: {message}")
         # 1. 提取结构化信息
         from_user = message.get("from_user")
         msg_type = message.get("msg_type")
         
         if msg_type == "text":
-            user_content = message.get("content")
-            print(f"[AgentManager] 收到文本内容: {user_content}，来自用户: {from_user}")
-            
-            # 直接回复 "你好" (暂时移除 AI 逻辑)
             try:
-                print(f"[AgentManager] 正在发送回复: 你好")
                 await wecom_service.send_text_message(
                     touser=from_user,
                     content="你好"
                 )
-                print("[AgentManager] 消息发送指令执行完毕")
             except Exception as e:
                 import logging
                 import traceback
