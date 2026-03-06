@@ -4,6 +4,10 @@ FROM python:3.11-slim
 # 设置工作目录
 WORKDIR /app
 
+# 设置 Python 环境变量，确保日志实时刷新到 stdout/stderr
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
 # 安装必要的系统库（针对 cryptography 编译）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
