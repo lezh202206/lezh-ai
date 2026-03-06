@@ -12,17 +12,30 @@
 │   │   ├── langgraph_agent.py  # LangGraph Agent 实现
 │   │   └── tools.py            # LangChain 工具/Skills
 │   ├── api/              # 路由层：定义 API 接口 (FastAPI)
+│   │   └── wecom.py            # 企业微信回调接口实现
 │   ├── core/             # 核心配置层：环境配置、工具初始化
+│   │   ├── config.py            # 环境变量和全局配置管理
+│   │   └── wecom_crypto.py      # 企业微信加密/解密对象初始化
 │   ├── services/         # 业务逻辑层：消息处理、数据解析
+│   │   └── wecom_service.py     # 企业微信消息处理服务
 │   ├── wecom/            # 企业微信 SDK 源码（加解密）
+│   │   └── crypto.py            # 企业微信加解密实现
 │   └── main.py           # 应用入口：挂载路由、启动服务
 ├── tests/                # 测试代码
+│   ├── test_agent.py            # Agent 功能测试
+│   ├── test_crypto.py           # 加密/解密功能测试
+│   └── test_wecom_send.py       # 企业微信消息发送测试
 ├── .env                  # 环境变量配置 (本地开发，不提交)
 ├── .env.example          # 环境变量示例文件
+├── .gitignore            # Git 忽略文件配置
+├── DEPLOY.md             # 部署说明文档
+├── Dockerfile            # Docker 构建文件
 ├── Makefile              # 项目管理命令
+├── PROJECT_STRUCTURE.md  # 本文档
+├── docker-compose.yml    # Docker Compose 配置文件
+├── langgraph.json        # LangGraph 配置文件
 ├── pyproject.toml        # 项目配置文件 (包含 LangSmith 配置)
-├── requirements.txt      # 依赖项
-└── PROJECT_STRUCTURE.md  # 本文档
+└── requirements.txt      # 依赖项
 ```
 
 ---
@@ -74,12 +87,40 @@
 3. **测试 Skill**: 可以在 `langgraph_agent.py` 中直接测试，或通过企业微信发送特定指令来触发。
 4. **调试与追踪**: 在 [LangSmith](https://smith.langchain.com/) 上观察 Agent 的执行流程，确保 Skill 被正确调用。
 
+### 测试流程
+1. **运行测试**: 使用 `pytest` 命令运行测试，确保所有功能正常。
+2. **测试文件说明**:
+   - `test_agent.py`: 测试 Agent 功能，确保智能体能够正确处理消息。
+   - `test_crypto.py`: 测试企业微信加解密功能，确保消息安全。
+   - `test_wecom_send.py`: 测试企业微信消息发送功能，确保消息能够正确发送。
+
+### Docker 部署
+1. **构建镜像**: 使用 `docker build -t wecom-ai-agent .` 构建 Docker 镜像。
+2. **运行容器**: 使用 `docker-compose up -d` 启动服务。
+3. **配置**: 通过 `.env` 文件配置环境变量，或在 `docker-compose.yml` 中设置。
+4. **服务信息**:
+   - 容器名称: `wecom-callback`
+   - 端口映射: `8099:8099`
+   - 重启策略: `always`
+   - 环境变量: 从 `.env` 文件加载
+5. **基础镜像**: `python:3.11-slim`
+6. **运行命令**: `uvicorn app.main:app --host 0.0.0.0 --port 8099`
+
 ---
 
 ## 依赖说明
 - **FastAPI**: 用于提供高性能的 API 服务。
-- **LangChain/LangGraph**: 用于构建和编排智能体逻辑。
+- **Uvicorn**: ASGI 服务器，用于运行 FastAPI 应用。
+- **Cryptography**: 企业微信加解密必需。
+- **Python-dotenv**: 用于加载环境变量。
+- **LangChain**: 用于构建和管理 AI 智能体。
+- **LangGraph**: 用于构建和编排智能体的状态图逻辑。
+- **LangGraph-CLI**: LangGraph 命令行工具。
+- **LangChain-OpenAI**: LangChain 与 OpenAI 模型的集成。
+- **LangChain-Community**: LangChain 社区工具和集成。
 - **DashScope**: 阿里云通义千问模型官方 SDK。
 - **LangSmith**: 用于 Agent 的调试、追踪和监控。
-- **Cryptography**: 企业微信加解密必需。
+- **Pydantic-Settings**: 用于管理环境变量和配置。
 - **HTTPX**: 用于异步 HTTP 请求（在 `wecom_service.py` 中使用）。
+- **Respx**: 用于模拟 HTTP 请求，用于测试。
+- **Pytest-asyncio**: 用于测试异步代码。
