@@ -33,11 +33,15 @@ dev:
 	langgraph dev --allow-blocking
 
 ## 启动 LangSmith 本地实例
-langsmith-start:
+run:
 	@echo "--> Starting LangSmith local instance..."
-	docker compose up -d
+	docker compose up -d --build
 #
 ## 停止 LangSmith 本地实例
-langsmith-stop:
+down:
 	@echo "--> Stopping LangSmith local instance..."
 	docker compose down
+##
+logs:
+	@echo "--> logs"
+	docker logs -f wecom-callback
