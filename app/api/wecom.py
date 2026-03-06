@@ -4,6 +4,8 @@ from app.services.wecom_service import wecom_service
 from app.agents.agent_manager import agent_manager
 import logging
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/callback", tags=["wecom"])
 
 @router.get("")
@@ -20,7 +22,7 @@ async def verify_url(
         sReplyMsg = wecom_service.verify_url(msg_signature, timestamp, nonce, echostr)
         return PlainTextResponse(content=sReplyMsg)
     except Exception as e:
-        logging.error(f"Verify URL failed: {e}")
+        logger.error(f"Verify URL failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("")
@@ -39,7 +41,7 @@ async def receive_msg(
     try:
         # 使用封装后的方法统一处理消息接收
         message_info = wecom_service.handle_received_message(msg_signature, timestamp, nonce, body)
-        logging.info(f"Structured message: {message_info}")
+        logger.info(f"Structured message: {message_info}")
         
         # 使用 Agent 处理逻辑
         # 后续大模型将接收 message_info，并通过 send_text_message 回复
@@ -48,5 +50,5 @@ async def receive_msg(
         # 企业微信要求收到消息后必须回复 success 或者空字符串
         return Response(content="success", media_type="text/plain")
     except Exception as e:
-        logging.error(f"Handle message failed: {e}")
+        logger.error(f"Handle message failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
