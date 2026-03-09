@@ -23,10 +23,15 @@ llm = ChatOpenAI(
     model=settings.LLM_MODEL_NAME,
     api_key=settings.DASHSCOPE_API_KEY,
     base_url=settings.OPENAI_API_BASE,
+    temperature=0.1,  # 降低温度，提高工具调用的准确性
+    max_tokens=1000,  # 增加最大 token 数，确保工具调用参数完整
 )
 
 # 将工具绑定到模型，这样模型就知道它有哪些工具可用
-tool_llm = llm.bind_tools(tools)
+tool_llm = llm.bind_tools(
+    tools,
+    tool_choice="auto"  # 自动选择工具，确保模型会考虑使用工具
+)
 
 
 # 3. 定义 Agent 的节点

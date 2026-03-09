@@ -24,12 +24,13 @@ def get_weather(city: str, time_range: str = "today") -> str:
 def jenkins_build(project: str, environment: str, branch: str, service_name: str) -> str:
     """
     触发 Jenkins 项目构建。
+    当用户请求构建服务时使用此工具。
     支持指定项目、环境、分支和服务名。
 
     Args:
-        project: 项目名称，例如：project-A
+        project: 项目名称，例如：kobe
         environment: 环境名称，例如：dev、test、prod
-        branch: 代码分支，例如：master、test、feature-xxx
+        branch: 代码分支，例如：master、test、feature/test
         service_name: 服务名称，例如：order、customer、merchant
 
     Returns:
