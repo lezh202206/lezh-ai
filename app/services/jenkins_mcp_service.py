@@ -70,7 +70,7 @@ class JenkinsMCPService:
                             },
                             "service_name": {
                                 "type": "string",
-                                "description": "服务名称，比如 order、user、payment 等。",
+                                "description": "服务名称，比如 order、customer、merchant 等。",
                             }
                         },
                         "required": ["project", "environment", "branch", "service_name"],
