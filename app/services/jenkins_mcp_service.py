@@ -2,16 +2,11 @@ import json
 import datetime
 import logging
 from typing import Any, Dict, List, Optional
+
+import jenkins
 from dashscope import Generation
 from dashscope.api_entities.dashscope_response import GenerationResponse
 from app.core.config import settings
-
-# 懒加载 jenkins 模块，避免在未安装时导入失败
-jenkins = None
-try:
-    import jenkins
-except ImportError:
-    pass
 
 logging.getLogger(__name__)
 
@@ -45,7 +40,6 @@ class JenkinsMCPService:
         """
         检查 Jenkins 是否已配置
         """
-        logging.info(f"{self.jenkins_url},{self.jenkins_url},{self.jenkins_password}")
         return bool(self.jenkins_url) and bool(self.jenkins_username) and bool(self.jenkins_password)
 
     def _get_tools(self) -> List[Dict[str, Any]]:
@@ -120,13 +114,6 @@ class JenkinsMCPService:
             return json.dumps({
                 "success": False,
                 "message": "Jenkins 服务未配置，请联系管理员。"
-            }, ensure_ascii=False)
-
-        # 检查 jenkins 模块
-        if jenkins is None:
-            return json.dumps({
-                "success": False,
-                "message": "Jenkins 模块未安装，请联系管理员。"
             }, ensure_ascii=False)
 
         try:
