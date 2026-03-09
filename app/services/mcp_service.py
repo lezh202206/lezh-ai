@@ -104,7 +104,16 @@ class MCPService:
         }]
         
         try:
-            return self._get_weather(city, time_range)
+            tool_result = self._get_weather(city, time_range)
+
+            response = self._call_model(messages)
+
+            if response.status_code != 200:
+                return f"天气查询服务暂时不可用，请稍后再试。（错误码: {response.status_code}）"
+
+            final_output = response.output.choices[0].message
+            return tool_result
+
         except Exception as e:
             return f"天气查询出错：{str(e)}"
     
