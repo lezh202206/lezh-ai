@@ -29,4 +29,10 @@ class Settings:
     BAILIAN_MCP_API_KEY: str = os.getenv("BAILIAN_MCP_API_KEY", "")
     BAILIAN_MCP_BASE_URL: str = os.getenv("BAILIAN_MCP_BASE_URL", "https://mcp.api.aliyun.com/v1")
 
+    # JENKINS
+    JENKINS_URL: str = os.getenv("JENKINS_URL", "")
+    JENKINS_USERNAME: str = os.getenv("JENKINS_USERNAME","")
+    JENKINS_PASSWORD: str = os.getenv("JENKINS_PASSWORD","")
+    JENKINS_TOKEN: str = os.getenv("JENKINS_TOKEN","")
+
 settings = Settings()

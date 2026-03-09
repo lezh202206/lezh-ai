@@ -17,7 +17,9 @@
 │   │   ├── config.py            # 环境变量和全局配置管理
 │   │   └── wecom_crypto.py      # 企业微信加密/解密对象初始化
 │   ├── services/         # 业务逻辑层：消息处理、数据解析
-│   │   └── wecom_service.py     # 企业微信消息处理服务
+│   │   ├── wecom_service.py     # 企业微信消息处理服务
+│   │   ├── mcp_service.py       # 阿里云百炼 MCP 服务封装
+│   │   └── jenkins_mcp_service.py # Jenkins 构建服务封装
 │   ├── wecom/            # 企业微信 SDK 源码（加解密）
 │   │   └── crypto.py            # 企业微信加解密实现
 │   └── main.py           # 应用入口：挂载路由、启动服务
@@ -63,9 +65,11 @@
 ### 3. **Service 层 (`app/services/`)**
 - **定位**: 业务规则实现层。
 - **职责**: 
-  - 封装与外部服务（如企业微信 API）的交互逻辑。
+  - 封装与外部服务（如企业微信 API、MCP 服务、Jenkins）的交互逻辑。
   - `wecom_service.py`: 负责企业微信消息的加解密、XML 解析、获取 Access Token、主动发送消息等。
-- **扩展建议**: 如果未来需要集成其他外部服务（如数据库、Redis），应在此处创建新的 `service` 文件。
+  - `mcp_service.py`: 封装阿里云百炼 MCP 服务，提供天气查询等功能。
+  - `jenkins_mcp_service.py`: 封装 Jenkins 构建服务，提供项目构建、部署等功能。
+- **扩展建议**: 如果未来需要集成其他外部服务（如数据库、Redis、其他 MCP 服务），应在此处创建新的 `service` 文件。
 
 ### 4. **Core 层 (`app/core/`)**
 - **定位**: 系统基础设施和全局配置。

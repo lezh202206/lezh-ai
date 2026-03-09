@@ -4,6 +4,7 @@ import os
 import sys
 
 from app.services import mcp_service
+from app.services.jenkins_mcp_service import jenkins_mcp_service
 
 # 将项目根目录添加到路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -27,6 +28,32 @@ async def test_agent_logic():
 
 def testget_weather():
     mcp_service.mcp_service.get_weather("北京")
+
+def testget_jenkins():
+    # result = jenkins_mcp_service.build_jenkins(
+    #     project="kobe-service-common",
+    #     environment="dev",
+    #     branch="feature/test",
+    #     service_name="order"
+    # )
+    # result = jenkins_mcp_service.build_jenkins(
+    #     project="aristotle-test",
+    #     environment="",
+    #     branch="test",
+    #     service_name=""
+    # )
+    # result = jenkins_mcp_service.build_jenkins(
+    #     project="kobe-mq-common",
+    #     environment="dev",
+    #     branch="feature/test",
+    #     service_name="bonus"
+    # )
+    result = jenkins_mcp_service.build_jenkins(
+        project="kobe-scheduler-common",
+        environment="dev",
+        branch="feature/test",
+        service_name="bonus_clear"
+    )
 
 if __name__ == "__main__":
     # 检查 API Key

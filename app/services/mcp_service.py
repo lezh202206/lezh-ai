@@ -59,10 +59,8 @@ class MCPService:
         
         today = datetime.datetime.now()
         
-        # 构建时间范围描述
         time_desc = self._get_time_range_desc(time_range)
         
-        # 构建查询参数
         query_params = {
             "location": location,
             "time_range": time_range,
@@ -70,8 +68,6 @@ class MCPService:
             "current_date": today.strftime("%Y-%m-%d")
         }
         
-        # 调用 MCP 服务获取天气数据
-        # 这里使用模拟数据，实际应该调用真实的 MCP 服务
         weather_data = {
             "location": location,
             "time_range": time_range,
@@ -108,16 +104,13 @@ class MCPService:
         }]
         
         try:
-            # 直接执行工具获取天气数据
             tool_result = self._get_weather(city, time_range)
             
-            # 构建消息，使用用户角色而不是工具角色
             weather_data_message = {
                 "role": "user",
                 "content": f"天气数据：{tool_result}\n\n请根据以上天气数据，生成一个自然、友好的天气报告。包含天气状况、温度、湿度、风力等信息，并提供相应的出行建议。"
             }
             
-            # 添加天气数据和润色指令
             messages.append(weather_data_message)
             
             response = self._call_model(messages)
