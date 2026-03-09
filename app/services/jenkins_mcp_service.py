@@ -1,5 +1,6 @@
 import json
 import datetime
+import logging
 from typing import Any, Dict, List, Optional
 from dashscope import Generation
 from dashscope.api_entities.dashscope_response import GenerationResponse
@@ -12,6 +13,8 @@ try:
 except ImportError:
     pass
 
+logging.getLogger(__name__)
+
 
 class JenkinsMCPService:
     """
@@ -23,11 +26,11 @@ class JenkinsMCPService:
         # 加载配置
         self.api_key = settings.BAILIAN_MCP_API_KEY or settings.DASHSCOPE_API_KEY
         self.model = settings.LLM_MODEL_NAME
-        self.jenkins_url = getattr(settings, 'JENKINS_URL', '')
-        self.jenkins_username = getattr(settings, 'JENKINS_USERNAME', '')
-        self.jenkins_password = getattr(settings, 'JENKINS_PASSWORD', '')
-        self.jenkins_token = getattr(settings, 'JENKINS_TOKEN', '')
-        
+        self.jenkins_url = settings.JENKINS_URL
+        self.jenkins_username = settings.JENKINS_USERNAME
+        self.jenkins_password = settings.JENKINS_PASSWORD
+        self.jenkins_token = settings.JENKINS_TOKEN
+
         # 配置项目名称处理规则
         self.common_suffixes = ["-service", "-mq", "-scheduler"]
 
@@ -35,12 +38,14 @@ class JenkinsMCPService:
         """
         检查 MCP 服务是否已配置
         """
+        logging.info(f"{self.api_key}")
         return bool(self.api_key)
 
     def is_jenkins_configured(self) -> bool:
         """
         检查 Jenkins 是否已配置
         """
+        logging.info(f"{self.jenkins_url},{self.jenkins_url},{self.jenkins_password}")
         return bool(self.jenkins_url) and bool(self.jenkins_username) and bool(self.jenkins_password)
 
     def _get_tools(self) -> List[Dict[str, Any]]:
@@ -85,7 +90,7 @@ class JenkinsMCPService:
         """
         if "-" in project and not any(project.endswith(suffix) for suffix in self.common_suffixes):
             return project
-        
+
         if service_name:
             return f"{project}-{service_name}"
         return project
@@ -97,12 +102,12 @@ class JenkinsMCPService:
         params = {
             "BRANCH": branch
         }
-        
+
         if environment:
             params["ENV"] = environment
         if service_name:
             params["SERVICENAME"] = service_name
-            
+
         return params
 
     def _build_jenkins(self, project: str, environment: str, branch: str, service_name: str) -> str:
@@ -116,14 +121,14 @@ class JenkinsMCPService:
                 "success": False,
                 "message": "Jenkins 服务未配置，请联系管理员。"
             }, ensure_ascii=False)
-        
+
         # 检查 jenkins 模块
         if jenkins is None:
             return json.dumps({
                 "success": False,
                 "message": "Jenkins 模块未安装，请联系管理员。"
             }, ensure_ascii=False)
-        
+
         try:
             # 连接 Jenkins 服务器
             server = jenkins.Jenkins(
@@ -131,14 +136,14 @@ class JenkinsMCPService:
                 username=self.jenkins_username,
                 password=self.jenkins_password
             )
-            
+
             # 生成任务名称和构建参数
             job_name = self._get_job_name(project, service_name)
             params = self._get_build_params(branch, environment, service_name)
-            
+
             # 触发构建
             build_number = server.build_job(job_name, parameters=params)
-            
+
             # 构建结果
             build_data = {
                 "success": True,
@@ -151,9 +156,9 @@ class JenkinsMCPService:
                 "build_number": build_number,
                 "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
-            
+
             return json.dumps(build_data, ensure_ascii=False)
-            
+
         except Exception as e:
             return json.dumps({
                 "success": False,
