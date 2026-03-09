@@ -177,44 +177,10 @@ class JenkinsMCPService:
 
     def build_jenkins(self, project: str, environment: str, branch: str, service_name: str) -> str:
         """
-        使用 MCP 服务执行 Jenkins 构建任务
-        通过 DashScope SDK Function Calling 实现
+        执行 Jenkins 构建任务
         支持指定项目、环境、分支和服务名
         """
-        # 检查配置
-        if not self.is_configured():
-            return "MCP 服务未配置，请联系管理员。"
-
-        # 构建消息
-        messages = [{
-            "role": "user",
-            "content": f"执行 Jenkins 构建：项目{project}，环境{environment}，分支{branch}，服务名{service_name}"
-        }]
-
-        try:
-            # 执行构建
-            tool_result = self._build_jenkins(project, environment, branch, service_name)
-
-            # 构建消息
-            build_data_message = {
-                "role": "user",
-                "content": f"Jenkins 构建结果：{tool_result}\n\n请根据以上构建结果，生成一个自然、友好的构建报告。包含构建状态、任务名称、构建编号等信息，并提供相应的后续操作建议。"
-            }
-
-            messages.append(build_data_message)
-
-            # 调用模型生成报告
-            response = self._call_model(messages)
-
-            # 处理响应
-            if response.status_code != 200:
-                return f"Jenkins 构建服务暂时不可用，请稍后再试。（错误码: {response.status_code}）"
-
-            final_output = response.output.choices[0].message
-            return final_output.get("content", "无法生成构建报告，请稍后再试。")
-
-        except Exception as e:
-            return f"Jenkins 构建出错：{str(e)}"
+        return self._build_jenkins(project, environment, branch, service_name)
 
 
 jenkins_mcp_service = JenkinsMCPService()
