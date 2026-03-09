@@ -104,23 +104,7 @@ class MCPService:
         }]
         
         try:
-            tool_result = self._get_weather(city, time_range)
-            
-            weather_data_message = {
-                "role": "user",
-                "content": f"天气数据：{tool_result}\n\n请根据以上天气数据，生成一个自然、友好的天气报告。包含天气状况、温度、湿度、风力等信息，并提供相应的出行建议。"
-            }
-            
-            messages.append(weather_data_message)
-            
-            response = self._call_model(messages)
-            
-            if response.status_code != 200:
-                return f"天气查询服务暂时不可用，请稍后再试。（错误码: {response.status_code}）"
-            
-            final_output = response.output.choices[0].message
-            return final_output.get("content", "无法生成天气报告，请稍后再试。")
-        
+            return self._get_weather(city, time_range)
         except Exception as e:
             return f"天气查询出错：{str(e)}"
     
